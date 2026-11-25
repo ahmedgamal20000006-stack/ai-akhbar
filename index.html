@@ -48,6 +48,35 @@ main{padding:12px 14px 80px;max-width:720px;margin:0 auto}
 <button id="refreshFab" title="تحديث">⟳</button>
 <div id="installBar"><span>ثبّت التطبيق على تليفونك</span><button id="installBtn">تثبيت</button><button class="x" id="installX">✕</button></div>
 <script>
+const FEEDS={
+"ai":["https://news.google.com/rss/search?q=%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1+%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A+when:2d&hl=ar&gl=EG&ceid=EG:ar","https://news.google.com/rss/search?q=artificial+intelligence+OR+OpenAI+OR+ChatGPT+when:1d&hl=en-US&gl=US&ceid=US:en"],
+"tech":["https://news.google.com/rss/search?q=%D8%AA%D9%83%D9%86%D9%88%D9%84%D9%88%D8%AC%D9%8A%D8%A7+OR+%D8%AA%D9%82%D9%86%D9%8A%D8%A9+when:2d&hl=ar&gl=EG&ceid=EG:ar","https://news.google.com/rss/search?q=technology+when:1d&hl=en-US&gl=US&ceid=US:en"],
+"tools":["https://news.google.com/rss/search?q=AI+tools+OR+%22AI+app%22+when:3d&hl=en-US&gl=US&ceid=US:en","https://news.google.com/rss/search?q=%D8%A3%D8%AF%D9%88%D8%A7%D8%AA+%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1+%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A+when:7d&hl=ar&gl=EG&ceid=EG:ar"],
+"inventions":["https://news.google.com/rss/search?q=%D8%A7%D8%AE%D8%AA%D8%B1%D8%A7%D8%B9+OR+%D8%A7%D8%A8%D8%AA%D9%83%D8%A7%D8%B1+when:3d&hl=ar&gl=EG&ceid=EG:ar","https://news.google.com/rss/search?q=invention+OR+breakthrough+when:2d&hl=en-US&gl=US&ceid=US:en"],
+"world":["https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar"]};
+const STALE_MS=45*60*1000;
+function parseItems(items){const out=[];
+ for(const it of items){let title=it.title||"",source="";
+  const i=title.lastIndexOf(" - ");
+  if(i>10){source=title.slice(i+3);title=title.slice(0,i)}
+  let dt="";try{dt=new Date((it.pubDate||"").replace(" ","T")+"Z").toISOString()}catch(e){}
+  if(title&&dt)out.push({title:title.trim(),link:it.link||"",source,date:dt})}
+ return out}
+async function fetchFeed(url){const r=await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(url));
+ if(!r.ok)throw 0;const j=await r.json();if(j.status!=="ok")throw 0;return j.items||[]}
+async function clientRefresh(){
+ $("#updated").textContent="بيجيب آخر الأخبار…";
+ const cats=[];
+ for(const c of DATA.categories){
+  const urls=FEEDS[c.id]||[];let items=[];const seen=new Set();
+  for(const u of urls){try{for(const it of parseItems(await fetchFeed(u))){
+   const k=it.title.replace(/\W+/g,"").toLowerCase().slice(0,80);
+   if(k&&!seen.has(k)){seen.add(k);items.push(it)}}}catch(e){}}
+  if(items.length){items.sort((a,b)=>(a.date<b.date?1:-1));cats.push({id:c.id,name:c.name,items:items.slice(0,40)})}
+  else cats.push(c)}
+ DATA={generated_at:new Date().toISOString(),categories:cats};
+ localStorage.setItem("nd_cache",JSON.stringify(DATA));
+ showUpdated();renderTabs();renderList()}
 const CATS_ORDER=["ai","tech","tools","inventions","world"];
 let DATA=null,cur="ai";
 const $=s=>document.querySelector(s);
@@ -83,7 +112,8 @@ async function load(force){$("#updated").textContent="جاري التحميل…
    st.innerHTML="مش قادر أوصل للأخبار.<br>اتأكد من النت وحاول تاني.<br><br>";
    const b=document.createElement("button");b.textContent="حاول تاني";b.onclick=()=>load(true);st.appendChild(b);}}}
 $("#refreshFab").onclick=()=>load(true);
-load(false);setInterval(()=>load(false),30*60*1000);
+load(false).then(()=>{if(DATA&&Date.now()-new Date(DATA.generated_at).getTime()>STALE_MS)clientRefresh().catch(()=>{showUpdated()})});
+setInterval(()=>load(false),30*60*1000);
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 let deferredPrompt;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("#installBar").style.display="flex"});
