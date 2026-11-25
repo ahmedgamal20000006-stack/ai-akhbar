@@ -1,0 +1,32 @@
+name: build-apk
+on:
+  push:
+    paths:
+      - "android/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: install gradle
+        run: |
+          curl -sSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-7.6.4-bin.zip
+          unzip -q /tmp/gradle.zip -d /opt
+          echo "/opt/gradle-7.6.4/bin" >> $GITHUB_PATH
+      - name: build debug apk
+        run: cd android && gradle --no-daemon assembleDebug
+      - name: publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk nabd-tech.apk
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "نبض التقنية APK" --notes "أحدث نسخة من تطبيق نبض التقنية" || true
+          gh release upload latest nabd-tech.apk --clobber
