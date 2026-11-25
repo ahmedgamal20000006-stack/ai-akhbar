@@ -1,0 +1,17 @@
+{
+  "name": "نبض التقنية - أخبار الذكاء الاصطناعي والتكنولوجيا",
+  "short_name": "نبض التقنية",
+  "description": "أخبار الذكاء الاصطناعي والتكنولوجيا والأدوات والاختراعات وأهم أحداث العالم، متجددة تلقائيًا.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
