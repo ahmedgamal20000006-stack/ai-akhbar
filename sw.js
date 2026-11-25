@@ -1,5 +1,5 @@
-const SHELL = "nabd-shell-v1";
-const ASSETS = ["./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const SHELL = "nabd-shell-v2";
+const ASSETS = ["./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(SHELL).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
@@ -17,7 +17,15 @@ self.addEventListener("fetch", e => {
     );
     return;
   }
-  if (e.request.mode === "navigate" || ASSETS.some(a => url.pathname.endsWith(a.replace("./", "/")))) {
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request).then(r => {
+        const cl = r.clone(); caches.open(SHELL).then(c => c.put("./index.html", cl)); return r;
+      }).catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+  if (ASSETS.some(a => url.pathname.endsWith(a.replace("./", "/")))) {
     e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(r => {
       const cl = r.clone(); caches.open(SHELL).then(c => c.put(e.request, cl)); return r;
     })));
