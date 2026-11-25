@@ -22,11 +22,15 @@ h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--acc2);box-shad
 nav{display:flex;gap:8px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 nav button{flex:0 0 auto;border:1px solid #26345e;background:var(--card);color:var(--mut);padding:8px 14px;border-radius:999px;font-size:14px;cursor:pointer;font-family:inherit}
+.langrow{display:flex;gap:8px;padding:0 0 10px}
+.langrow button{flex:0 0 auto;border:1px solid #26345e;background:transparent;color:var(--mut);padding:5px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.langrow button.on{border-color:var(--acc2);color:var(--acc2);font-weight:700}
 nav button.on{background:linear-gradient(135deg,var(--acc),#6d4fff);color:#fff;border-color:transparent;font-weight:700}
 main{padding:12px 14px 80px;max-width:720px;margin:0 auto}
 .card{display:block;background:var(--card);border:1px solid #1e2a4a;border-radius:14px;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:inherit;transition:transform .12s,border-color .12s}
 .card:active{transform:scale(.985);border-color:var(--acc)}
 .card h2{font-size:15.5px;line-height:1.55;font-weight:600}
+.tr{font-size:12.5px;color:var(--mut);margin-top:6px;line-height:1.65}
 .meta{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--mut)}
 .src{background:var(--card2);padding:2px 8px;border-radius:6px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .time{margin-inline-start:auto}
@@ -43,24 +47,50 @@ main{padding:12px 14px 80px;max-width:720px;margin:0 auto}
   <h1><span class="dot"></span>نبض التقنية</h1>
   <div id="updated">جاري التحميل…</div>
   <nav id="tabs"></nav>
+  <div class="langrow" id="langrow">
+    <button data-l="all">الكل</button>
+    <button data-l="ar">عربي</button>
+    <button data-l="en">English</button>
+  </div>
 </header>
 <main><div id="list"></div><div id="status" style="display:none"></div></main>
 <button id="refreshFab" title="تحديث">⟳</button>
 <div id="installBar"><span>ثبّت التطبيق على تليفونك</span><button id="installBtn">تثبيت</button><button class="x" id="installX">✕</button></div>
 <script>
 const FEEDS={
-"ai":["https://news.google.com/rss/search?q=%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1+%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A+when:2d&hl=ar&gl=EG&ceid=EG:ar","https://news.google.com/rss/search?q=artificial+intelligence+OR+OpenAI+OR+ChatGPT+when:1d&hl=en-US&gl=US&ceid=US:en"],
-"tech":["https://news.google.com/rss/search?q=%D8%AA%D9%83%D9%86%D9%88%D9%84%D9%88%D8%AC%D9%8A%D8%A7+OR+%D8%AA%D9%82%D9%86%D9%8A%D8%A9+when:2d&hl=ar&gl=EG&ceid=EG:ar","https://news.google.com/rss/search?q=technology+when:1d&hl=en-US&gl=US&ceid=US:en"],
-"tools":["https://news.google.com/rss/search?q=AI+tools+OR+%22AI+app%22+when:3d&hl=en-US&gl=US&ceid=US:en","https://news.google.com/rss/search?q=%D8%A3%D8%AF%D9%88%D8%A7%D8%AA+%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1+%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A+when:7d&hl=ar&gl=EG&ceid=EG:ar"],
-"inventions":["https://news.google.com/rss/search?q=%D8%A7%D8%AE%D8%AA%D8%B1%D8%A7%D8%B9+OR+%D8%A7%D8%A8%D8%AA%D9%83%D8%A7%D8%B1+when:3d&hl=ar&gl=EG&ceid=EG:ar","https://news.google.com/rss/search?q=invention+OR+breakthrough+when:2d&hl=en-US&gl=US&ceid=US:en"],
-"world":["https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar"]};
+"ai":[["https://news.google.com/rss/search?q=%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1+%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A+when:2d&hl=ar&gl=EG&ceid=EG:ar","ar"],["https://news.google.com/rss/search?q=artificial+intelligence+OR+OpenAI+OR+ChatGPT+when:1d&hl=en-US&gl=US&ceid=US:en","en"]],
+"tech":[["https://news.google.com/rss/search?q=%D8%AA%D9%83%D9%86%D9%88%D9%84%D9%88%D8%AC%D9%8A%D8%A7+OR+%D8%AA%D9%82%D9%86%D9%8A%D8%A9+when:2d&hl=ar&gl=EG&ceid=EG:ar","ar"],["https://news.google.com/rss/search?q=technology+when:1d&hl=en-US&gl=US&ceid=US:en","en"]],
+"tools":[["https://news.google.com/rss/search?q=AI+tools+OR+%22AI+app%22+when:3d&hl=en-US&gl=US&ceid=US:en","en"],["https://news.google.com/rss/search?q=%D8%A3%D8%AF%D9%88%D8%A7%D8%AA+%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1+%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A+when:7d&hl=ar&gl=EG&ceid=EG:ar","ar"]],
+"inventions":[["https://news.google.com/rss/search?q=%D8%A7%D8%AE%D8%AA%D8%B1%D8%A7%D8%B9+OR+%D8%A7%D8%A8%D8%AA%D9%83%D8%A7%D8%B1+when:3d&hl=ar&gl=EG&ceid=EG:ar","ar"],["https://news.google.com/rss/search?q=invention+OR+breakthrough+when:2d&hl=en-US&gl=US&ceid=US:en","en"]],
+"world":[["https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar","ar"],["https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en","en"]]};
 const STALE_MS=45*60*1000;
-function parseItems(items){const out=[];
+const BLOCKED=["facebook","instagram","threads.net","biggo","tiktok","pinterest"];
+let LANG=localStorage.getItem("nd_lang")||"all";
+function guessLang(t){return /[\u0600-\u06FF]/.test(t)?"ar":"en"}
+const TRK="nd_tr";
+function trCache(){try{return JSON.parse(localStorage.getItem(TRK)||"{}")}catch(e){return{}}}
+async function translateOne(title){
+ const c=trCache();if(c[title])return c[title];
+ try{const r=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(title)+"&langpair=en|ar");
+  if(!r.ok)return null;const j=await r.json();
+  const t=j&&j.responseData&&j.responseData.translatedText;
+  if(!t||j.quotaFinished)return null;
+  if(t.trim().toLowerCase()===title.trim().toLowerCase())return null;
+  c[title]=t;const ks=Object.keys(c);if(ks.length>300)delete c[ks[0]];
+  localStorage.setItem(TRK,JSON.stringify(c));return t}catch(e){return null}}
+async function fillTranslations(cards){
+ let n=0;
+ for(const {el,title} of cards){if(n>=25)break;
+  const t=await translateOne(title);n++;
+  if(t){const d=document.createElement("div");d.className="tr";d.textContent=t;
+   el.querySelector("h2").after(d)}}}
+function parseItems(items,lang){const out=[];
  for(const it of items){let title=it.title||"",source="";
   const i=title.lastIndexOf(" - ");
   if(i>10){source=title.slice(i+3);title=title.slice(0,i)}
   let dt="";try{dt=new Date((it.pubDate||"").replace(" ","T")+"Z").toISOString()}catch(e){}
-  if(title&&dt)out.push({title:title.trim(),link:it.link||"",source,date:dt})}
+  if(BLOCKED.some(b=>source.toLowerCase().includes(b)))continue;
+  if(title&&dt)out.push({title:title.trim(),link:it.link||"",source,date:dt,lang})}
  return out}
 async function fetchFeed(url){const r=await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(url));
  if(!r.ok)throw 0;const j=await r.json();if(j.status!=="ok")throw 0;return j.items||[]}
@@ -69,14 +99,14 @@ async function clientRefresh(){
  const cats=[];
  for(const c of DATA.categories){
   const urls=FEEDS[c.id]||[];let items=[];const seen=new Set();
-  for(const u of urls){try{for(const it of parseItems(await fetchFeed(u))){
+  for(const [u,ulang] of urls){try{for(const it of parseItems(await fetchFeed(u),ulang)){
    const k=it.title.replace(/\W+/g,"").toLowerCase().slice(0,80);
    if(k&&!seen.has(k)){seen.add(k);items.push(it)}}}catch(e){}}
   if(items.length){items.sort((a,b)=>(a.date<b.date?1:-1));cats.push({id:c.id,name:c.name,items:items.slice(0,40)})}
   else cats.push(c)}
  DATA={generated_at:new Date().toISOString(),categories:cats};
  localStorage.setItem("nd_cache",JSON.stringify(DATA));
- showUpdated();renderTabs();renderList()}
+ showUpdated();renderTabs();renderLangRow();renderList()}
 const CATS_ORDER=["ai","tech","tools","inventions","world"];
 let DATA=null,cur="ai";
 const $=s=>document.querySelector(s);
@@ -84,19 +114,28 @@ function ago(iso){if(!iso)return"";const s=(Date.now()-new Date(iso).getTime())/
  if(s<3600)return"من "+Math.max(1,Math.round(s/60))+" دقيقة";
  if(s<86400)return"من "+Math.round(s/3600)+" ساعة";
  return"من "+Math.round(s/86400)+" يوم";}
+function renderLangRow(){for(const b of document.querySelectorAll("#langrow button")){
+ b.className=b.dataset.l===LANG?"on":"";
+ b.onclick=()=>{LANG=b.dataset.l;localStorage.setItem("nd_lang",LANG);renderLangRow();renderList()}}}
 function renderTabs(){const n=$("#tabs");n.innerHTML="";
  for(const c of DATA.categories){const b=document.createElement("button");
   b.textContent=c.name;b.className=c.id===cur?"on":"";
   b.onclick=()=>{cur=c.id;renderTabs();renderList();window.scrollTo(0,0)};n.appendChild(b)}}
 function renderList(){const c=DATA.categories.find(x=>x.id===cur);const L=$("#list");L.innerHTML="";
  $("#status").style.display="none";
- if(!c||!c.items.length){$("#status").style.display="block";$("#status").textContent="مفيش أخبار في القسم ده دلوقتي.";return}
- for(const it of c.items){const a=document.createElement("a");a.className="card";a.href=it.link;a.target="_blank";a.rel="noopener";
+ const items=c?c.items.filter(it=>LANG==="all"||(it.lang||guessLang(it.title))===LANG):[];
+ if(!items.length){$("#status").style.display="block";$("#status").textContent=LANG==="ar"?"مفيش أخبار عربي في القسم ده دلوقتي.":LANG==="en"?"No English news here right now.":"مفيش أخبار في القسم ده دلوقتي.";return}
+ for(const it of items){const a=document.createElement("a");a.className="card";a.href=it.link;a.target="_blank";a.rel="noopener";
   const h=document.createElement("h2");h.textContent=it.title;a.appendChild(h);
   const m=document.createElement("div");m.className="meta";
   if(it.source){const s=document.createElement("span");s.className="src";s.textContent=it.source;m.appendChild(s)}
   const t=document.createElement("span");t.className="time";t.textContent=ago(it.date);m.appendChild(t);
-  a.appendChild(m);L.appendChild(a)}}
+  a.appendChild(m);L.appendChild(a)}
+ const needTr=[];
+ if(LANG!=="ar"){const L2=$("#list").children;
+  for(const a of L2){const h=a.querySelector("h2");
+   if(h&&guessLang(h.textContent)==="en")needTr.push({el:a,title:h.textContent})}
+  fillTranslations(needTr)}}
 function showUpdated(){const d=new Date(DATA.generated_at);
  $("#updated").textContent="آخر تحديث: "+ago(DATA.generated_at);}
 async function load(force){$("#updated").textContent="جاري التحميل…";
@@ -106,7 +145,7 @@ async function load(force){$("#updated").textContent="جاري التحميل…
   localStorage.setItem("nd_cache",JSON.stringify(DATA));
   showUpdated();renderTabs();renderList();}
  catch(e){const old=localStorage.getItem("nd_cache");
-  if(old){DATA=JSON.parse(old);showUpdated();renderTabs();renderList();
+  if(old){DATA=JSON.parse(old);showUpdated();renderTabs();renderLangRow();renderList();
    $("#updated").textContent="مفيش نت — دي آخر أخبار محفوظة ("+ago(DATA.generated_at)+")";}
   else{const st=$("#status");st.style.display="block";
    st.innerHTML="مش قادر أوصل للأخبار.<br>اتأكد من النت وحاول تاني.<br><br>";
